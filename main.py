@@ -1,7 +1,6 @@
 import socket
 import dpkt
 import binascii
-import re
 
 # custom
 import parsers
@@ -39,7 +38,8 @@ if __name__ == "__main__":
         if parsed_data is None:
             continue
         #
-        if True:
+        # if True:
+        if parsed_data["TCP Header"]["Destination Port"] == 80:
             parsers.formatters.tcp_packet_formatter(parsed_data)
             #
             #

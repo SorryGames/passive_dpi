@@ -1,3 +1,4 @@
+import re
 import struct
 import formatters
 
@@ -90,11 +91,16 @@ def parse_http_packet(data):
     #
     #
     try:
-        parsed_data["TCP Payload"] = str(data_to_process)
-        print(re.match("(HTTP).*Host: ([\\d\\w\\.]*)", parsed_data["TCP Payload"]))
-
-    except:
+        parsed_data["TCP Payload"] = data_to_process.decode("ascii")
+    except Exception as e:
         pass
+    #
+    #
+    regex_match = re.match(".*(HTTP).*Host: ([\\d\\w\\.]).*", parsed_data["TCP Payload"])
+    if regex_match is None:
+        parsed_data["Application"], parsed_data["HTTP Host"] = ("", "")
+    else:
+        parsed_data["Application"], parsed_data["HTTP Host"] = regex_match.groups
     #
     #
     return parsed_data
