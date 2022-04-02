@@ -90,17 +90,16 @@ def parse_http_packet(data):
     parsed_data["TCP Header"] = header
     #
     #
+    parsed_data["TCP Payload"] = ""
     try:
-        parsed_data["TCP Payload"] = data_to_process.decode("ascii")
+        parsed_data["TCP Payload"] = data_to_process.decode("utf-8").replace("\r\n", " ")
     except Exception as e:
         pass
     #
     #
-    regex_match = re.match(".*(HTTP).*Host: ([\\d\\w\\.]).*", parsed_data["TCP Payload"])
-    if regex_match is None:
-        parsed_data["Application"], parsed_data["HTTP Host"] = ("", "")
-    else:
-        parsed_data["Application"], parsed_data["HTTP Host"] = regex_match.groups
+    regex_match = re.match(".*Host:\\W*([\\w\\.]*).*", parsed_data["TCP Payload"])
+    if regex_match is not None:
+        parsed_data["Application"], parsed_data["HTTP Host"] = ('http', regex_match.group(1))
     #
     #
     return parsed_data
