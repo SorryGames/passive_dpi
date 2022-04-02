@@ -1,9 +1,8 @@
-from collections import defaultdict
 import parsers
 
 
 
-class TCPSessionDatabase():
+class SessionDatabase():
 
 	def __init__(self):
 		self.database = []
@@ -25,13 +24,46 @@ class TCPSessionDatabase():
 
 
 
-class Session():
+class TCPSession():
+    """
+    srcip -> dstip -> srcport -> dstport -> proto {
+        server_info = {ip, port, http_host, ssl_servername, ...}
+        client_info = {ip, port, ...}
+        session_info = {
+            application = (http, ssl, ftp, ...)
+            seqn, ackn = 0, 0
+            should_be_blocked = (True, False)
+        }
+    }
+    """
 
-    def __init__(self, raw_packet=None):
-        self.session = None
+    def __init__(self, **session_keys):
+        """
+        args = packet_raw (from ethernet header to application header)
+            or session_keys
+        """
+        self.session = {
+            "server_info": {  
+                "ip": None,
+                "port": None,  # new attributes can be added dynamically (for example http_host)
+            },
+            "client_info": {
+                "ip": None,
+                "port": None,  # new attributes can be added dynamically (for example mac_address)
+            },
+            "session_info": {
+                "application": None,  # http, ftp, ssh, telnet, ...
+                "should_be_blocked": False,  # does session should be blocked according to policies
+                "seqn": 0,  # sequence number
+                "ackn": 0,  # acknowledge number
+            },
+        }
         #
-        if raw_packet is not None:
-            self.session = self.parse_raw_packet(raw_packet)
+        if session_keys is not None:
+            self.update(raw_packet=raw_packet)
+        #
+        if session_keys
+        print(session_keys)
 
 
     def parse_raw_packet(self, raw_packet):
@@ -70,3 +102,4 @@ class Session():
 
     def update(self, session):
         pass
+
