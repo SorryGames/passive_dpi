@@ -64,6 +64,12 @@ def parse_tcp_header(data):
 
 
 
+
+
+
+
+
+
 def parse_http_packet(data):
     data_to_process = data
     parsed_data = {}
@@ -97,9 +103,12 @@ def parse_http_packet(data):
         pass
     #
     #
-    regex_match = re.match(".*Host:\\W*([\\w\\.]*).*", parsed_data["TCP Payload"])
+    regex_match = re.match(".*HTTP.*Host:\\W*([\\w\\.]*).*", parsed_data["TCP Payload"])
     if regex_match is not None:
-        parsed_data["Application"], parsed_data["HTTP Host"] = ('http', regex_match.group(1))
+        parsed_data["HTTP Host"] = regex_match.group(1)
     #
+    regex_match = re.match(".*HTTP\\/[\\d\\.]*.*", parsed_data["TCP Payload"])
+    if regex_match is not None:
+        parsed_data["Application"] = 'http'
     #
     return parsed_data
