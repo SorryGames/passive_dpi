@@ -26,7 +26,7 @@ class SessionDatabase():
 
 class TCPSession():
     """
-    srcip -> dstip -> srcport -> dstport -> proto {
+    STRUCTURE = {
         server_info = {ip, port, http_host, ssl_servername, ...}
         client_info = {ip, port, ...}
         session_info = {
@@ -37,11 +37,18 @@ class TCPSession():
     }
     """
 
-    def __init__(self, **session_keys):
+    def __init__(self, **kwargs):
         """
-        args = packet_raw (from ethernet header to application header)
-            or session_keys
+        PURPOSE
+        + create a session using raw network packet (from ethernet header to application payload)
+        + or create an empty session and update it with another dict object
+
+        ARGS 
+        +   (1) pass any dict object which will be used to update self.session
+        +   (2) pass { "raw_packet": <bytes object> } to update self.session
+
         """
+
         self.session = {
             "server_info": {  
                 "ip": None,
@@ -59,11 +66,14 @@ class TCPSession():
             },
         }
         #
-        if session_keys is not None:
-            self.update(raw_packet=raw_packet)
-        #
-        if session_keys
-        print(session_keys)
+        self.update(**kwargs)
+    
+
+    def update(self, **kwargs):
+        if "raw_packet" in kwargs.keys():
+            pass
+        else:
+            pass
 
 
     def parse_raw_packet(self, raw_packet):
@@ -85,18 +95,6 @@ class TCPSession():
         seqn = parsed_data["TCP Header"]["Seq number"]
         ackn = parsed_data["TCP Header"]["Ack number"]
         #
-        #
-        #
-        session[srcip] = {}
-        session[srcip][dstip] = {}
-        session[srcip][dstip][srcport] = {}
-        session[srcip][dstip][srcport][dstport] = {}
-        session[srcip][dstip][srcport][dstport][proto] = {
-            "seqn": seqn,
-            "ackn": ackn,
-            "application": "",
-            "hostname": "",
-        }
         #
         return session
 
