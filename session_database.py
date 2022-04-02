@@ -4,23 +4,22 @@ import parsers
 
 class SessionDatabase():
 
-	def __init__(self):
-		self.database = []
+    def __init__(self):
+        self.database = []
 
 
 
     def create_session(self, session):
-		self.database[srcip]
-		pass
+        pass
 
-	def delete_session(self):
-		pass
+    def delete_session(self):
+        pass
 
-	def get_session(self):
-		pass
+    def get_session(self):
+        pass
 
-	def rst_session(self):
-		pass
+    def rst_session(self):
+        pass
 
 
 
@@ -60,44 +59,75 @@ class TCPSession():
             },
             "session_info": {
                 "application": None,  # http, ftp, ssh, telnet, ...
-                "should_be_blocked": False,  # does session should be blocked according to policies
+                "should_be_blocked": None,  # does session should be blocked according to policies
+                "category_id": None,  # does session should be blocked according to policies
                 "seqn": 0,  # sequence number
                 "ackn": 0,  # acknowledge number
             },
         }
         #
         self.update(**kwargs)
-    
+
 
     def update(self, **kwargs):
         if "raw_packet" in kwargs.keys():
-            pass
+            update_with = self.update_with_raw_packet(raw_packet=kwargs["raw_packet"])
         else:
-            pass
+            update_with = kwargs
+        #
+        try:
+            for key in self.session.keys():
+                self.session[key].update(update_with[key])
+        except Exception as e:
+            print(e)  # TODO 
+            return False
+        #
+        return True
 
 
-    def parse_raw_packet(self, raw_packet):
+    def update_with_raw_packet(self, raw_packet):
         parsed_data = parsers.parse_http_packet(data=raw_packet)
         #
         if parsed_data is None:
             return None
         #
+        session_update = {
+            "server_info": {},
+            "client_info": {},
+            "session_info": {},
+        }
         #
         #
-        srcip = parsed_data["IP Header"]["Source Address"]
-        dstip = parsed_data["IP Header"]["Destination Address"]
+        if parsed_data["TCP Header"]["Control Flags"] == "SYN":
+            # write server_info & client_info
+            session_update["client_info"] = {
+                "ip": parsed_data["IP Header"]["Source Address"],
+                "port": parsed_data["TCP Header"]["Source Port"],
+            }
+            session_update["server_info"] = {
+                "ip": parsed_data["IP Header"]["Destination Address"],
+                "port": parsed_data["TCP Header"]["Destination Port"],
+            }
+        if parsed_data.get("HTTP Host") is not None:
+            session_update["session_info"] = {
+                "http_host": parsed_data["HTTP Host"]
+            }
         #
-        proto = parsed_data["IP Header"]["Protocol"]
+        if parsed_data.get("Application") is not None:
+            session_update["session_info"] = {
+                "application": parsed_data["Application"]
+            }
         #
-        srcport = parsed_data["TCP Header"]["Source Port"]
-        dstport = parsed_data["TCP Header"]["Destination Port"]
+        if parsed_data.get("Application") is not None:
+            session_update["session_info"] = {
+                "application": parsed_data["Application"]
+            }
         #
-        seqn = parsed_data["TCP Header"]["Seq number"]
-        ackn = parsed_data["TCP Header"]["Ack number"]
+        session_update["session_info"]["seqn"] = parsed_data["TCP Header"]["Seq number"]
+        session_update["session_info"]["ackn"] = parsed_data["TCP Header"]["Ack number"]
         #
-        #
-        return session
+        return session_update
 
-    def update(self, session):
-        pass
 
+    def get(self):
+        return self.session
