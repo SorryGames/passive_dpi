@@ -1,0 +1,13 @@
+srcip -> dstip -> srcport -> dstport -> proto {
+	
+	
+	
+	server_info = (ip, port, http_host, ssl_servername, ...)
+	client_info = (ip, port, ...)
+	session_info = (
+		application = (http, ssl, ftp, ...)
+		seqn, ackn
+		should_be_blocked = (yes | no)
+	)
+
+}
