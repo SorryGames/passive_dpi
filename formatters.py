@@ -42,13 +42,3 @@ def tcp_control_flags_formatter(value):
     return flags
 
 
-
-
-
-
-def tcp_packet_formatter(packet):
-    print("New packet arrived:")
-    print("#" * 60)
-    print(json.dumps(packet, sort_keys=True, indent=4))
-    print("#" * 60)
-    print("\n" * 7)
