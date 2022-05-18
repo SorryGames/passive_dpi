@@ -2,9 +2,7 @@ import time
 import json
 import parsers
 import threading
-import session_classes
-from session_id_generator import SessionIDGenerator
-
+from session_database import SessionDatabase
 
 
 
@@ -14,7 +12,7 @@ class PacketProcessing():
     """
     """
 
-    PRINT_QUEUE_INFO_FREQ = 10
+    PRINT_QUEUE_INFO_FREQ = 60
 
     def __init__(self):
         self.queue = []
@@ -58,14 +56,11 @@ class PacketProcessing():
                 #
                 #
                 #
-                session_id = SessionIDGenerator.get_tcp_session_id(
-                    src_ip=parsed_tcp["IP Header"]["Source Address"],
-                    dst_ip=parsed_tcp["IP Header"]["Destination Address"],
-                    src_port=parsed_tcp["TCP Header"]["Source Port"],
-                    dst_port=parsed_tcp["TCP Header"]["Destination Port"],
-                )
-                if session_id is None: 
-                    continue
+            # src_ip=parsed_tcp["IP Header"]["Source Address"],
+            # dst_ip=parsed_tcp["IP Header"]["Destination Address"],
+            # src_port=parsed_tcp["TCP Header"]["Source Port"],
+            # dst_port=parsed_tcp["TCP Header"]["Destination Port"],
+
                 #
                 #
                 #
