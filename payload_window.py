@@ -6,11 +6,11 @@ class PayloadWindow():
     """
     """
 
-    WINDOW_SIZE = 500
+    WINDOW_SIZE = 5000
 
 
     def __init__(self):
-        pass
+        self.window = ""
 
 
     def put(self, content):
@@ -28,3 +28,7 @@ class PayloadWindow():
         except Exception as e:
             print(e)  # TODO
             return []
+
+
+    def __str__(self):
+        return self.window
