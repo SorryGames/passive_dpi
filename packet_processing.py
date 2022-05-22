@@ -16,6 +16,7 @@ class PacketProcessing():
 
     def __init__(self):
         self.queue = []
+        self.dst_db = None
 
         # run threads
         self._print_queue_info_thread = threading.Thread(target=self._print_queue_info)
@@ -24,6 +25,9 @@ class PacketProcessing():
         self._process_packets_thread = threading.Thread(target=self._process_packets)
         self._process_packets_thread.start()
 
+
+    def set_destination_database(self, database):
+        self.dst_db = database
 
 
     def push(self, packet):
@@ -46,7 +50,7 @@ class PacketProcessing():
 
     def _process_packets(self):
         while True:
-            if len(self.queue):
+            if len(self.queue) and self.dst_db is not None:
                 packet = self._process()
                 #
                 # parsing packet
@@ -54,17 +58,14 @@ class PacketProcessing():
                 if parsed_tcp is None:
                     continue
                 #
+                self.dst_db.update_tcp_session(
+                    src_ip=parsed_tcp["IP Header"]["Source Address"],
+                    dst_ip=parsed_tcp["IP Header"]["Destination Address"],
+                    src_port=parsed_tcp["TCP Header"]["Source Port"],
+                    dst_port=parsed_tcp["TCP Header"]["Destination Port"],                    
+                    payload=parsed_tcp["TCP Payload"],
+                )
                 #
-                #
-            # src_ip=parsed_tcp["IP Header"]["Source Address"],
-            # dst_ip=parsed_tcp["IP Header"]["Destination Address"],
-            # src_port=parsed_tcp["TCP Header"]["Source Port"],
-            # dst_port=parsed_tcp["TCP Header"]["Destination Port"],
-
-                #
-                #
-                #
-
 
 
     def _print_packet(self, packet):
