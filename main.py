@@ -32,9 +32,9 @@ if __name__ == "__main__":
     #
     # create PacketProcessing instance
     processing = packet_processing.PacketProcessing()
-
-
-    # session_database = TCPSessionDatabase
+    session_db = session_database.SessionDatabase()
+    #
+    processing.set_destination_database(database=session_db)
     #
     while True:
         # byte string (ascii)
