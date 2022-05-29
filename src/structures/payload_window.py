@@ -6,11 +6,11 @@ class PayloadWindow():
     """
     """
 
-    WINDOW_SIZE = 5000
+    WINDOW_SIZE = 500
 
 
     def __init__(self):
-        self.window = ""
+        self.window = bytes()
 
 
     def put(self, content):
@@ -24,11 +24,15 @@ class PayloadWindow():
 
     def find(self, regex):
         try:
-            return re.match(regex, self.window).groups()
+            matches = re.match(regex, self.window, re.IGNORECASE)
+            if matches is None:
+                return ()
+            #
+            return matches.groups()
         except Exception as e:
             print(e)  # TODO
-            return []
+            return ()
 
 
     def __str__(self):
-        return self.window
+        return str(self.window)

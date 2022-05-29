@@ -1,10 +1,9 @@
 import time
 import json
-import parsers
 import threading
 
-from session_id_generator import SessionIDGenerator
-from session_classes import TCPSession
+from database.session_id_generator import SessionIDGenerator
+from database.session_classes import TCPSession
 
 
 
@@ -14,7 +13,7 @@ class DatabaseEntry():
     """
     """
 
-    TTL = 1000  # seconds
+    TTL = 300  # seconds
 
     def __init__(self, session_object):
         self.session_object = session_object 
@@ -56,13 +55,27 @@ class SessionDatabase():
     """
     """
 
+    PRINT_TABLE_FREQ = 10
+    CLEAR_TABLE_FREQ = 60
+
+
     def __init__(self):
         self.database = {}
+        self.services = []
+        #
         self._print_database = threading.Thread(target=self._print_database)
         self._print_database.start()
+        #
+        self._database_clear_process = threading.Thread(target=self._remove_irrelevant_sessions)
+        self._database_clear_process.start()
+        #
 
 
-    def update_tcp_session(self, src_ip, src_port, dst_ip, dst_port, payload=""):
+    def subscribe_service_for_updates(self, method_to_execute):
+        self.services.append(method_to_execute)
+
+
+    def update_tcp_session(self, src_ip, src_port, dst_ip, dst_port, payload="", **kwargs):
         session_id = SessionIDGenerator.get_tcp_session_id(
             src_ip=src_ip,
             dst_ip=dst_ip,
@@ -85,23 +98,48 @@ class SessionDatabase():
         self.database[session_id].make_online()
         self.database[session_id].get_session().update_with_payload(payload=payload)
         #
+        for key, value in kwargs.items():
+            self.database[session_id].get_session().update_with_attribute(key=key, value=value)
+        #
+        #
+        # execute subscribed services 
+        for service in self.services:
+            try:
+                # execute service
+                service(session=self.database[session_id])
+            except Exception as e: 
+                print(e)  # TODO
+        #
+        return True
 
 
-    def _clear_irrelevant_sessions(self):
-        pass
+    def _remove_irrelevant_sessions(self):
+        assert SessionDatabase.CLEAR_TABLE_FREQ >= 0, "CLEAR_TABLE_FREQ should have a positive value"
+        while True:
+            removed_sessions = 0
+            for session_id in self.database.keys():
+                if self.database[session_id].is_online == False:
+                    self.database.pop(session_id)
+                    removed_sessions += 1
+            #
+            #
+            print("SessionDatabase._remove_irrelevant_sessions: {} sessions were cleared (age > TTL)".format(
+                                                                                            removed_sessions))
+            time.sleep(SessionDatabase.CLEAR_TABLE_FREQ)
+
 
     def get_session(self):
         pass
 
+
     def _print_database(self):
-        while True:
+        while SessionDatabase.PRINT_TABLE_FREQ >= 0:
             keys = list(self.database.keys())
             for key in keys:
                 print("#" * 60)
                 print(key)
                 print(self.database[key])
-                # print(json.loads(str(self.database[key]), sort_keys=True, indent=4))
                 print("#" * 60)
                 print("\n" * 7)
-
-            time.sleep(5)
+            #
+            time.sleep(SessionDatabase.PRINT_TABLE_FREQ)

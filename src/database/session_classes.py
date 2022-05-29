@@ -1,6 +1,8 @@
 import time
 import json
-from payload_window import PayloadWindow
+
+
+from structures.payload_window import PayloadWindow
 
 
 
@@ -54,7 +56,7 @@ class TCPSession():
 
 
     def get_payload(self):
-        return str(self.payload)
+        return self.payload
 
 
     def get_attributes(self):
@@ -65,7 +67,7 @@ class TCPSession():
         session_info = {
             "Src IP/Port": "{}:{}".format(*self.get_source()),
             "Dst IP/Port": "{}:{}".format(*self.get_destination()),
-            "TCP Payload": self.get_payload(),
+            "TCP Payload": str(self.get_payload()),
             "Attributes": self.get_attributes(),
         }
         return session_info
